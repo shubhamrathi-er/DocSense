@@ -6,110 +6,46 @@ interface ChatMessageProps {
 
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-1.5 py-1">
+    <div className="flex gap-1 items-center py-1">
       {[0, 150, 300].map((delay, i) => (
         <div
           key={i}
-          className="w-2 h-2 rounded-full bg-violet-400 animate-bounce"
-          style={{
-            animationDelay: `${delay}ms`,
-            animationDuration: "1.2s",
-          }}
+          className="w-1.5 h-1.5 rounded-full bg-[#b5b2ac] animate-bounce"
+          style={{ animationDelay: `${delay}ms`, animationDuration: "1.2s" }}
         />
       ))}
-
-      <span className="text-[12px] text-[#71717a] ml-2">
-        AI is thinking...
-      </span>
     </div>
   );
 }
 
-export default function ChatMessage({
-  message,
-}: ChatMessageProps) {
+export default function ChatMessage({ message }: ChatMessageProps) {
   if (message.type === "summary") return null;
 
   const isUser = message.role === "user";
 
   return (
-    <div
-      className={`flex items-end gap-3 ${
-        isUser ? "justify-end" : "justify-start"
-      }`}
-    >
-      {/* AI Avatar */}
-      {!isUser && (
-        <div
-          className="
-          w-10 h-10 rounded-2xl
-          bg-gradient-to-br
-          from-blue-500
-          to-violet-500
-          flex items-center justify-center
-          text-white text-sm font-semibold
-          shadow-lg shadow-violet-200
-          flex-shrink-0
-        "
-        >
-          AI
-        </div>
-      )}
-
-      {/* Message Bubble */}
+    <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
+      {/* Avatar */}
       <div
-        className={`
-          max-w-[72%]
-          px-5 py-4
-          rounded-3xl
-          text-[14px]
-          leading-relaxed
-          transition-all duration-300
-          shadow-sm
-          ${
-            isUser
-              ? `
-                bg-gradient-to-r
-                from-blue-500
-                to-violet-500
-                text-white
-                rounded-br-md
-                shadow-lg shadow-violet-200/40
-              `
-              : `
-                bg-white
-                border border-[#ececf1]
-                text-[#18181b]
-                rounded-bl-md
-              `
-          }
-        `}
+        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 border ${
+          isUser
+            ? "bg-[#f0ede8] text-[#8a8680] border-[#d4d0c8]"
+            : "bg-blue-50 text-blue-600 border-blue-200"
+        }`}
       >
-        {message.typing ? (
-          <TypingIndicator />
-        ) : (
-          <div className="whitespace-pre-wrap break-words">
-            {message.content}
-          </div>
-        )}
+        {isUser ? "SR" : "AI"}
       </div>
 
-      {/* User Avatar */}
-      {isUser && (
-        <div
-          className="
-          w-10 h-10 rounded-2xl
-          bg-[#f4f4f5]
-          border border-[#e4e4e7]
-          flex items-center justify-center
-          text-[#52525b]
-          text-sm font-semibold
-          flex-shrink-0
-        "
-        >
-          SR
-        </div>
-      )}
+      {/* Bubble */}
+      <div
+        className={`max-w-[65%] px-4 py-3 rounded-xl text-sm leading-relaxed shadow-sm ${
+          isUser
+            ? "bg-blue-600 text-white rounded-tr-sm"
+            : "bg-white border border-[#e8e6e1] text-[#333] rounded-tl-sm"
+        }`}
+      >
+        {message.typing ? <TypingIndicator /> : message.content}
+      </div>
     </div>
   );
 }

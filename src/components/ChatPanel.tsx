@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Document, Message } from "../types";
 import ChatMessage from "./ChatMessage";
 import SummaryCard from "./SummaryCard";
@@ -6,16 +6,32 @@ import SummaryCard from "./SummaryCard";
 interface ChatPanelProps {
   activeDoc: Document | null;
   messages: Message[];
-  onSend: (message: string) => void;
+  onSend: (text: string) => void;
   isLoading: boolean;
 }
 
 const SUGGESTIONS = [
-  "Summarize this document",
-  "What are the key insights?",
-  "Extract important skills",
-  "What are the risks or concerns?",
-];
+  "What are the key risks?",
+  "Summarize action items",
+  "Who are the stakeholders?",
+  "Timeline overview",
+] as const;
+
+const SendIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="white"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="22" y1="2" x2="11" y2="13" />
+    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  </svg>
+);
 
 export default function ChatPanel({
   activeDoc,
@@ -23,286 +39,165 @@ export default function ChatPanel({
   onSend,
   isLoading,
 }: ChatPanelProps) {
-  const [input, setInput] = useState("");
-
-  const bottomRef =
-    useRef<HTMLDivElement>(null);
+  const [input, setInput] = useState<string>("");
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-  }, [messages, isLoading]);
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  const handleSend = () => {
-    const trimmed = input.trim();
-
-    if (!trimmed || isLoading) return;
-
-    onSend(trimmed);
-
+  const handleSend = (text?: string) => {
+    const msg = text ?? input.trim();
+    if (!msg || isLoading) return;
+    onSend(msg);
     setInput("");
   };
 
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLTextAreaElement>
-  ) => {
-    if (
-      e.key === "Enter" &&
-      !e.shiftKey
-    ) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-
       handleSend();
     }
   };
 
-  const summaryMessage = messages.find(
-    (m) => m.type === "summary"
-  );
+  const summaryMessage = messages.find((m) => m.type === "summary");
+  const chatMessages = messages.filter((m) => m.type === "chat");
 
-  const chatMessages = messages.filter(
-    (m) => m.type === "chat"
-  );
-
-  return (
-    <div className="flex flex-col h-screen bg-[#fafafa] overflow-hidden">
-      {/* Top Bar */}
-      <div className="h-[76px] px-8 border-b border-[#ececf1] bg-white/80 backdrop-blur-xl flex items-center justify-between flex-shrink-0">
-        {activeDoc ? (
-          <>
-            <div className="min-w-0">
-              <div className="text-[18px] font-semibold text-[#18181b] truncate">
-                {activeDoc.name}
-              </div>
-
-              <div className="flex items-center gap-3 mt-1">
-                <span className="text-[12px] text-[#71717a]">
-                  {activeDoc.pages} Pages
-                </span>
-
-                <div className="w-1 h-1 rounded-full bg-[#d4d4d8]" />
-
-                <span className="text-[12px] text-[#71717a]">
-                  {activeDoc.size}
-                </span>
-
-                <div className="w-1 h-1 rounded-full bg-[#d4d4d8]" />
-
-                <span className="text-[12px] text-violet-600 font-medium">
-                  AI Processed
-                </span>
-              </div>
-            </div>
-
-            <div
-              className="
-              px-3 py-1.5 rounded-full
-              bg-gradient-to-r
-              from-blue-500
-              to-violet-500
-              text-white
-              text-[11px]
-              font-semibold
-              uppercase tracking-wider
-              shadow-lg shadow-violet-200
-            "
-            >
-              AI Workspace
-            </div>
-          </>
-        ) : (
-          <div>
-            <div className="text-[18px] font-semibold text-[#18181b]">
-              AI Document Assistant
-            </div>
-
-            <div className="text-[13px] text-[#71717a] mt-1">
-              Upload documents and chat with AI
-            </div>
+  if (!activeDoc) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-[#f8f7f4]">
+        <div className="text-center">
+          <div className="text-5xl mb-4">📄</div>
+          <div className="text-[15px] font-medium text-[#1a1916] mb-2">
+            No document selected
           </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        {!activeDoc ? (
-          <div className="h-full flex flex-col items-center justify-center px-6">
-            <div
-              className="
-              w-24 h-24 rounded-[28px]
-              bg-gradient-to-br
-              from-blue-500
-              to-violet-500
-              flex items-center justify-center
-              text-white text-5xl
-              shadow-2xl shadow-violet-200
-            "
-            >
-              ✨
-            </div>
-
-            <div className="mt-8 text-[30px] font-semibold text-[#18181b] text-center">
-              Chat with your documents
-            </div>
-
-            <div className="mt-3 text-[15px] text-[#71717a] text-center max-w-[520px] leading-7">
-              Upload PDFs, DOCX, or TXT files and
-              instantly generate summaries,
-              insights, and AI-powered answers.
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mt-10 max-w-[700px] w-full">
-              {SUGGESTIONS.map((item) => (
-                <button
-                  key={item}
-                  className="
-                  p-4 rounded-2xl
-                  border border-[#ececf1]
-                  bg-white
-                  text-left
-                  text-[14px]
-                  text-[#3f3f46]
-                  transition-all duration-300
-                  hover:border-violet-200
-                  hover:shadow-lg hover:shadow-violet-100/20
-                "
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="max-w-5xl mx-auto px-8 py-8">
-            {/* Summary Card */}
-            {summaryMessage &&
-              summaryMessage.type ===
-                "summary" && (
-                <div className="mb-8">
-                  <SummaryCard
-                    summary={
-                      summaryMessage.summary
-                    }
-                    keyPoints={
-                      summaryMessage.keyPoints
-                    }
-                  />
-                </div>
-              )}
-
-            {/* Chat Messages */}
-            <div className="space-y-6">
-              {chatMessages.map((message) => (
-                <ChatMessage
-                  key={message.id}
-                  message={message}
-                />
-              ))}
-
-              {/* Typing */}
-              {isLoading && (
-                <ChatMessage
-                  message={{
-                    id: -1,
-                    type: "chat",
-                    role: "assistant",
-                    content: "",
-                    typing: true,
-                  }}
-                />
-              )}
-
-              <div ref={bottomRef} />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Input */}
-      {activeDoc && (
-        <div className="border-t border-[#ececf1] bg-white/80 backdrop-blur-xl p-6">
-          <div className="max-w-5xl mx-auto">
-            {/* Suggestions */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {SUGGESTIONS.map((item) => (
-                <button
-                  key={item}
-                  onClick={() =>
-                    setInput(item)
-                  }
-                  className="
-                  px-4 py-2 rounded-full
-                  text-[12px]
-                  font-medium
-                  bg-[#f4f4f5]
-                  text-[#52525b]
-                  transition-all duration-300
-                  hover:bg-violet-50
-                  hover:text-violet-600
-                "
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-
-            {/* Input Box */}
-            <div
-              className="
-              relative overflow-hidden
-              rounded-3xl
-              border border-[#e4e4e7]
-              bg-white
-              shadow-lg shadow-black/[0.03]
-            "
-            >
-              <textarea
-                value={input}
-                onChange={(e) =>
-                  setInput(e.target.value)
-                }
-                onKeyDown={handleKeyDown}
-                placeholder="Ask anything about this document..."
-                rows={1}
-                className="
-                w-full resize-none
-                bg-transparent
-                px-6 py-5 pr-20
-                text-[15px]
-                text-[#18181b]
-                placeholder:text-[#a1a1aa]
-                outline-none
-              "
-              />
-
-              <button
-                onClick={handleSend}
-                disabled={
-                  !input.trim() || isLoading
-                }
-                className="
-                absolute right-4 bottom-4
-                w-12 h-12 rounded-2xl
-                bg-gradient-to-r
-                from-blue-500
-                to-violet-500
-                text-white
-                flex items-center justify-center
-                shadow-lg shadow-violet-200
-                transition-all duration-300
-                disabled:opacity-50
-                disabled:cursor-not-allowed
-                hover:scale-[1.03]
-                active:scale-[0.98]
-              "
-              >
-                ↑
-              </button>
-            </div>
+          <div className="text-sm text-[#8a8680]">
+            Upload a PDF to start chatting with it
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    );
+  }
+
+  return (
+    <main className="flex flex-col h-screen overflow-hidden bg-[#f8f7f4]">
+
+      {/* Top bar */}
+      <div className="bg-white border-b border-[#e8e6e1] px-7 py-5.25 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div
+            className="text-[19px] text-[#1a1916]"
+            style={{ fontFamily: "'Instrument Serif', serif" }}
+          >
+            {activeDoc.name.replace(/\.[^.]+$/, "")}
+          </div>
+          {summaryMessage && (
+            <div className="flex items-center gap-1.5 text-[11px] text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Analyzed
+            </div>
+          )}
+        </div>
+        {/* <div className="flex gap-2">
+          {["Export", "Share"].map((label) => (
+            <button
+              key={label}
+              className="text-xs font-medium px-3.5 py-1.5 rounded-lg border border-[#d4d0c8] bg-white text-[#8a8680] hover:bg-[#f8f7f4] hover:text-[#1a1916] transition-all"
+            >
+              {label}
+            </button>
+          ))}
+          <button className="text-xs font-medium px-3.5 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all">
+            + New Chat
+          </button>
+        </div> */}
+      </div>
+
+      {/* Stats bar */}
+      <div className="bg-white border-b border-[#e8e6e1] px-7 py-3 flex gap-7 flex-shrink-0">
+        {[
+          { label: "Pages", value: activeDoc.pages },
+          { label: "Words", value: activeDoc.words ?? "—" },
+          { label: "Size", value: activeDoc.size },
+          {
+            label: "AI Summary",
+            value: summaryMessage ? "Ready" : "Processing...",
+            green: !!summaryMessage,
+          },
+        ].map((s) => (
+          <div
+            key={s.label}
+            className="flex items-center gap-1.5 text-xs text-[#8a8680]"
+          >
+            {s.label}
+            <span
+              className={`font-mono font-medium text-[13px] ml-0.5 ${
+                s.green ? "text-emerald-600" : "text-[#1a1916]"
+              }`}
+            >
+              {s.value}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-7 py-7 flex flex-col gap-5">
+        {summaryMessage?.type === "summary" && (
+          <SummaryCard
+            summary={summaryMessage.summary}
+            keyPoints={summaryMessage.keyPoints}
+          />
+        )}
+
+        {chatMessages.map((msg) => (
+          <ChatMessage key={msg.id} message={msg} />
+        ))}
+
+        {isLoading && (
+          <ChatMessage
+            message={{ id: -1, type: "chat", role: "assistant", content: "", typing: true }}
+          />
+        )}
+
+        <div ref={chatEndRef} />
+      </div>
+
+      {/* Input area */}
+      <div className="bg-white border-t border-[#e8e6e1] px-7 py-4 flex-shrink-0">
+        {/* Suggestion chips */}
+        <div className="flex gap-2 mb-3 flex-wrap">
+          {SUGGESTIONS.map((s) => (
+            <button
+              key={s}
+              onClick={() => handleSend(s)}
+              className="text-[11px] px-3 py-1.5 rounded-full border border-[#d4d0c8] bg-[#f8f7f4] text-[#8a8680] hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all whitespace-nowrap"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+
+        {/* Input row */}
+        <div className="flex gap-2.5 items-center bg-[#f8f7f4] border-[1.5px] border-[#d4d0c8] rounded-xl px-3.5 py-2.5 focus-within:border-blue-500 focus-within:shadow-[0_0_0_3px_rgba(37,99,235,0.08)] transition-all">
+          <input
+            value={input}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setInput(e.target.value)
+            }
+            onKeyDown={handleKeyDown}
+            placeholder="Ask anything about this document..."
+            className="flex-1 bg-transparent border-none outline-none text-sm text-[#1a1916] placeholder-[#b5b2ac]"
+          />
+          <button
+            onClick={() => handleSend()}
+            disabled={!input.trim() || isLoading}
+            className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:-translate-y-px flex-shrink-0"
+          >
+            <SendIcon />
+          </button>
+        </div>
+      </div>
+    </main>
   );
 }
