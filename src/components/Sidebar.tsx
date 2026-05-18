@@ -1,4 +1,3 @@
-
 import { useRef } from "react";
 import type { Document } from "../types";
 
@@ -15,298 +14,158 @@ interface DocCardProps {
   onClick: (doc: Document) => void;
 }
 
-const DOC_ICONS: Record<
-  string,
-  {
-    label: string;
-    bg: string;
-    text: string;
-  }
-> = {
-  pdf: {
-    label: "PDF",
-    bg: "bg-red-100",
-    text: "text-red-600",
-  },
-  docx: {
-    label: "DOC",
-    bg: "bg-blue-100",
-    text: "text-blue-600",
-  },
-  txt: {
-    label: "TXT",
-    bg: "bg-gray-100",
-    text: "text-gray-600",
-  },
+const DOC_ICONS: Record<string, string> = {
+  pdf: "📋",
+  doc: "📄",
+  docx: "📄",
+  txt: "📝",
+  xls: "📊",
+  xlsx: "📊",
 };
 
-function DocCard({
-  doc,
-  isActive,
-  onClick,
-}: DocCardProps) {
-  const icon =
-    DOC_ICONS[doc.type] ?? DOC_ICONS["txt"];
-
+function DocCard({ doc, isActive, onClick }: DocCardProps) {
   return (
     <div
       onClick={() => onClick(doc)}
-      className={`
-        relative overflow-hidden
-        rounded-2xl border
-        cursor-pointer
-        transition-all duration-300
-        mb-3 group
-        ${
-          isActive
-            ? "bg-white border-violet-200 shadow-xl shadow-violet-100/40"
-            : "bg-white border-transparent hover:border-[#e5e7eb] hover:shadow-md"
-        }
-      `}
+      className={`p-4 rounded-xl cursor-pointer transition-all mb-1 border ${
+        isActive
+          ? "bg-blue-50 border-blue-200"
+          : "border-transparent hover:bg-[#f8f7f4] hover:border-[#e8e6e1]"
+      }`}
     >
-      {isActive && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-violet-500 rounded-r-full" />
-      )}
-
-      <div className="p-4">
-        <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2.5 mb-2">
+        <div
+          className={`w-8 h-8 rounded-md flex items-center justify-center text-sm flex-shrink-0 ${
+            isActive ? "bg-blue-100" : "bg-[#f0ede8]"
+          }`}
+        >
+          {DOC_ICONS[doc.type] ?? "📄"}
+        </div>
+        <div className="min-w-0">
           <div
-            className={`
-              w-11 h-11 rounded-xl
-              flex items-center justify-center
-              text-[11px] font-bold tracking-wide
-              flex-shrink-0
-              ${icon.bg}
-              ${icon.text}
-            `}
+            className={`text-[13px] font-medium leading-snug truncate ${
+              isActive ? "text-blue-600" : "text-[#1a1916]"
+            }`}
           >
-            {icon.label}
+            {doc.name}
           </div>
-
-          <div className="min-w-0 flex-1">
-            <div
-              className={`
-                text-[14px] font-semibold truncate
-                transition-colors
-                ${
-                  isActive
-                    ? "text-violet-700"
-                    : "text-[#18181b]"
-                }
-              `}
-            >
-              {doc.name}
-            </div>
-
-            <div className="flex gap-2 mt-2 flex-wrap">
-              <span className="px-2 py-1 rounded-full text-[10px] font-medium bg-[#f4f4f5] text-[#71717a]">
-                {doc.pages} Pages
-              </span>
-
-              <span className="px-2 py-1 rounded-full text-[10px] font-medium bg-[#f4f4f5] text-[#71717a]">
-                {doc.size}
-              </span>
-
-              <span className="px-2 py-1 rounded-full text-[10px] font-medium bg-violet-50 text-violet-600">
-                AI Ready
-              </span>
-            </div>
+          <div className="flex gap-2 mt-1">
+            <span className="font-mono text-[9px] text-[#b5b2ac] bg-[#f0ede8] px-1.5 py-0.5 rounded">
+              {doc.pages} PAGES
+            </span>
+            <span className="font-mono text-[9px] text-[#b5b2ac] bg-[#f0ede8] px-1.5 py-0.5 rounded">
+              {doc.size}
+            </span>
           </div>
         </div>
       </div>
+
+      {isActive && (
+        <div className="h-0.5 bg-[#e8e6e1] rounded overflow-hidden">
+          <div className="h-full bg-blue-600 rounded w-full" />
+        </div>
+      )}
     </div>
   );
 }
 
-export default function Sidebar({
-  docs,
-  activeDoc,
-  onSelectDoc,
-  onUpload,
-}: SidebarProps) {
-  const fileInputRef =
-    useRef<HTMLInputElement>(null);
+export default function Sidebar({ docs, activeDoc, onSelectDoc, onUpload }: SidebarProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDrop = (
-    e: React.DragEvent<HTMLDivElement>
-  ) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-
     const file = e.dataTransfer.files[0];
-
     if (file) onUpload(file);
   };
 
-  const handleDragOver = (
-    e: React.DragEvent<HTMLDivElement>
-  ) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
   };
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
     if (file) onUpload(file);
-
     e.target.value = "";
   };
 
   return (
-    <aside className="bg-[#fafafa] border-r border-[#ececf1] flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="px-6 py-5 border-b border-[#ececf1] bg-white/80 backdrop-blur-xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <div
-              className="text-[30px] leading-none tracking-tight text-[#111827]"
-              style={{
-                fontFamily:
-                  "'Instrument Serif', serif",
-              }}
-            >
-              DocMind
-            </div>
-
-            <div className="text-[12px] text-[#71717a] mt-1">
-              AI-powered document workspace
-            </div>
-          </div>
-
-          <div className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider text-white bg-gradient-to-r from-blue-500 to-violet-500 shadow-md shadow-violet-200">
-            AI
-          </div>
+    <aside className="bg-white border-r border-[#e8e6e1] flex flex-col overflow-hidden">
+      {/* Brand */}
+      <div className="px-6 py-5 border-b border-[#e8e6e1] flex items-center justify-between flex-shrink-0">
+        <div
+          className="text-2xl text-[#1a1916] tracking-tight"
+          style={{ fontFamily: "'Instrument Serif', serif" }}
+        >
+          Document Summarizer
+        </div>
+        <div className="font-mono text-[9px] bg-blue-600 text-white px-2 py-1 rounded-full tracking-wide">
+          AI BETA
         </div>
       </div>
 
-      {/* Upload Section */}
-      <div className="p-5 border-b border-[#ececf1]">
+      {/* Upload zone */}
+      <div className="p-4 border-b border-[#e8e6e1] flex-shrink-0">
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          onClick={() =>
-            fileInputRef.current?.click()
-          }
-          className="
-            relative overflow-hidden
-            rounded-3xl
-            border border-[#e4e4e7]
-            bg-white
-            p-7
-            text-center
-            cursor-pointer
-            transition-all duration-300
-            hover:border-violet-300
-            hover:shadow-xl
-            hover:shadow-violet-100/40
-            group
-          "
+          onClick={() => fileInputRef.current?.click()}
+          className="border-2 border-dashed border-[#d4d0c8] rounded-xl p-6 text-center cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50 group"
         >
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-blue-50 via-violet-50 to-purple-50" />
-
-          <div className="relative z-10">
-            <div
-              className="
-                w-16 h-16
-                mx-auto mb-5
-                rounded-2xl
-                bg-gradient-to-br
-                from-blue-500
-                to-violet-500
-                flex items-center justify-center
-                text-white text-3xl
-                shadow-xl shadow-violet-200
-              "
-            >
-              ✨
-            </div>
-
-            <div className="text-[15px] font-semibold text-[#18181b]">
-              Upload your documents
-            </div>
-
-            <div className="text-[13px] text-[#71717a] mt-1 leading-relaxed">
-              Drag & drop files or click to browse
-            </div>
-
-            <div className="flex justify-center gap-2 flex-wrap mt-5">
-              {[
-                "PDF",
-                "DOCX",
-                "TXT",
-                "MAX 10MB",
-              ].map((tag) => (
-                <span
-                  key={tag}
-                  className="
-                    px-2.5 py-1
-                    rounded-full
-                    text-[10px]
-                    font-semibold
-                    tracking-wide
-                    bg-[#f4f4f5]
-                    text-[#71717a]
-                  "
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+          <div className="text-3xl mb-2">📎</div>
+          <div className="text-[13px] text-[#8a8680] leading-relaxed">
+            <span className="text-blue-600 font-medium group-hover:underline">
+              Upload document
+            </span>
+            <br />
+            Drag & drop or click to browse
+          </div>
+          <div className="flex gap-1.5 justify-center flex-wrap mt-2">
+            {["PDF", "DOCX", "TXT", "MAX 10MB"].map((tag) => (
+              <span
+                key={tag}
+                className="font-mono text-[9px] bg-[#f0ede8] text-[#8a8680] px-2 py-0.5 rounded tracking-wide"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
         </div>
-
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.docx,.txt"
+          accept=".pdf,.txt,.docx"
           className="hidden"
           onChange={handleFileChange}
         />
       </div>
 
-      {/* Document List */}
-      <div className="flex-1 overflow-y-auto relative">
-        <div className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#71717a]">
-              Documents
-            </div>
-
-            <div className="px-2 py-1 rounded-full text-[10px] font-semibold bg-[#f4f4f5] text-[#71717a]">
-              {docs.length}
-            </div>
-          </div>
-
-          {docs.length === 0 ? (
-            <div className="text-center mt-16">
-              <div className="text-5xl mb-4">
-                📂
-              </div>
-
-              <div className="text-[15px] font-medium text-[#18181b]">
-                No documents yet
-              </div>
-
-              <div className="text-[13px] text-[#71717a] mt-2 leading-relaxed">
-                Upload PDFs, DOCX, or TXT files
-                to begin AI analysis.
-              </div>
-            </div>
-          ) : (
-            docs.map((doc) => (
-              <DocCard
-                key={doc.id}
-                doc={doc}
-                isActive={activeDoc?.id === doc.id}
-                onClick={onSelectDoc}
-              />
-            ))
-          )}
+      {/* Document list */}
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex items-center justify-between mb-3 px-1">
+          <span className="text-[11px] font-semibold text-[#8a8680] uppercase tracking-widest">
+            Documents
+          </span>
+          <span className="font-mono text-[10px] bg-[#f0ede8] text-[#8a8680] px-2 py-0.5 rounded-full">
+            {docs.length}
+          </span>
         </div>
 
-        {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#fafafa] to-transparent pointer-events-none" />
+        {docs.length === 0 ? (
+          <div className="text-center text-[13px] text-[#b5b2ac] mt-8 leading-relaxed">
+            No documents yet.
+            <br />
+            Upload one to get started.
+          </div>
+        ) : (
+          docs.map((doc) => (
+            <DocCard
+              key={doc.id}
+              doc={doc}
+              isActive={activeDoc?.id === doc.id}
+              onClick={onSelectDoc}
+            />
+          ))
+        )}
       </div>
     </aside>
   );
