@@ -91,7 +91,7 @@ export default function Sidebar({ docs, activeDoc, onSelectDoc, onUpload }: Side
   return (
     <aside className="bg-white border-r border-[#e8e6e1] flex flex-col overflow-hidden">
       {/* Brand */}
-      <div className="px-6 py-5 border-b border-[#e8e6e1] flex items-center justify-between flex-shrink-0">
+      <div className="px-6 py-4.75 border-b border-[#e8e6e1] flex items-center justify-between flex-shrink-0">
         <div
           className="text-2xl text-[#1a1916] tracking-tight"
           style={{ fontFamily: "'Instrument Serif', serif" }}
