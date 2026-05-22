@@ -130,7 +130,7 @@ OPENROUTER_API_KEY=sk-or-your-key-here
 ### Running Locally
 
 ```bash
-# Terminal 1 — Frontend (http://localhost:4)
+# Terminal 1 — Frontend (http://localhost:5174)
 npm run dev
 
 # Terminal 2 — Backend (http://localhost:3001)
