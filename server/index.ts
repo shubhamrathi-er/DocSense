@@ -10,7 +10,7 @@ const app = express();
 app.use(cors({
   origin: [
     "http://localhost:5174",           // local dev
-    "https://docsense.vercel.app",     // production — update with real URL
+    "https://doc-sense-mu.vercel.app/",     // production — update with real URL
   ]
 }));
 app.use(express.json({ limit: "10mb" }));
