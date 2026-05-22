@@ -130,14 +130,14 @@ OPENROUTER_API_KEY=sk-or-your-key-here
 ### Running Locally
 
 ```bash
-# Terminal 1 — Frontend (http://localhost:5173)
+# Terminal 1 — Frontend (http://localhost:4)
 npm run dev
 
 # Terminal 2 — Backend (http://localhost:3001)
 cd server && npm run dev
 ```
 
-Visit **http://localhost:5173**, upload a PDF and start chatting.
+Visit **http://localhost:5174**, upload a PDF and start chatting.
 
 ---
 
