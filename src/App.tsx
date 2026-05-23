@@ -82,7 +82,7 @@ export default function App() {
       const systemPrompt = `You are a helpful document assistant. Answer questions based ONLY on the document content below. Be concise and accurate.
 
 DOCUMENT CONTENT:
-${activeDoc.extractedText?.slice(0, 2500) ?? "No content available."}`;
+${activeDoc.extractedText?.slice(0, 8000) ?? "No content available."}`;
 
       const aiResponse = await sendMessage(history, systemPrompt);
 
