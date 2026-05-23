@@ -32,7 +32,7 @@ export async function summarizeDocument(
 }
 
 Document text:
-${documentText.slice(0, 2500)}`;
+${documentText.slice(0, 8000)}`;
 
   const response = await fetch(AI_API_URL, {
     method: "POST",
