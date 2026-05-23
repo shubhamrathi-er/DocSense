@@ -15,12 +15,12 @@ export default function App() {
   const [activeDoc, setActiveDoc] = useState<Document | null>(null);
   const [messagesByDoc, setMessagesByDoc] = useState<MessageMap>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   const activeMessages: Message[] = activeDoc
     ? (messagesByDoc[activeDoc.id] ?? [])
     : [];
 
-  // ── Upload handler ──────────────────────────────────────────
   const handleUpload = async (file: File): Promise<void> => {
     const meta = getFileMetadata(file);
     const id = docIdCounter++;
@@ -29,18 +29,16 @@ export default function App() {
     setDocs((prev) => [newDoc, ...prev]);
     setActiveDoc(newDoc);
     setMessagesByDoc((prev) => ({ ...prev, [id]: [] }));
+    setSidebarOpen(false); // close sidebar on mobile after upload
 
     try {
       setIsLoading(true);
-
       const { text, pages } = await extractTextFromFile(file);
-
       const updatedDoc: Document = { ...newDoc, pages, extractedText: text };
       setDocs((prev) => prev.map((d) => (d.id === id ? updatedDoc : d)));
       setActiveDoc(updatedDoc);
 
       const { summary, keyPoints } = await summarizeDocument(text);
-
       setMessagesByDoc((prev) => ({
         ...prev,
         [id]: [{ id: msgIdCounter++, type: "summary", summary, keyPoints }],
@@ -53,7 +51,6 @@ export default function App() {
     }
   };
 
-  // ── Chat handler ────────────────────────────────────────────
   const handleSend = async (userText: string): Promise<void> => {
     if (!activeDoc || isLoading) return;
 
@@ -72,7 +69,6 @@ export default function App() {
     setIsLoading(true);
 
     try {
-      // Build history for Claude — only chat messages, not the summary card
       const history: ClaudeMessage[] = (messagesByDoc[activeDoc.id] ?? [])
         .filter((m): m is Extract<Message, { type: "chat" }> => m.type === "chat")
         .map((m) => ({ role: m.role, content: m.content }));
@@ -114,23 +110,47 @@ ${activeDoc.extractedText?.slice(0, 8000) ?? "No content available."}`;
     }
   };
 
+  const handleSelectDoc = (doc: Document) => {
+    setActiveDoc(doc);
+    setSidebarOpen(false); // close sidebar on mobile after selecting doc
+  };
+
   return (
-    <div
-      className="h-screen grid overflow-hidden"
-      style={{ gridTemplateColumns: "320px 1fr" }}
-    >
-      <Sidebar
-        docs={docs}
-        activeDoc={activeDoc}
-        onSelectDoc={setActiveDoc}
-        onUpload={handleUpload}
-      />
-      <ChatPanel
-        activeDoc={activeDoc}
-        messages={activeMessages}
-        onSend={handleSend}
-        isLoading={isLoading}
-      />
+    <div className="h-screen flex overflow-hidden bg-[#f8f7f4]">
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-20 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed inset-y-0 left-0 z-30 w-[300px]
+        transform transition-transform duration-300 ease-in-out
+        md:relative md:translate-x-0 md:w-[280px] lg:w-[320px]
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      `}>
+        <Sidebar
+          docs={docs}
+          activeDoc={activeDoc}
+          onSelectDoc={handleSelectDoc}
+          onUpload={handleUpload}
+        />
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 min-w-0">
+        <ChatPanel
+          activeDoc={activeDoc}
+          messages={activeMessages}
+          onSend={handleSend}
+          isLoading={isLoading}
+          onMenuClick={() => setSidebarOpen(true)}
+        />
+      </div>
     </div>
   );
 }

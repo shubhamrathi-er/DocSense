@@ -23,7 +23,7 @@ export default function SummaryCard({ summary, keyPoints }: SummaryCardProps) {
 
       {/* Key points grid */}
       {keyPoints.length > 0 && (
-        <div className="grid grid-cols-2 gap-2 px-5 pb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 px-5 pb-5">
           {keyPoints.map((point, i) => (
             <div
               key={i}
