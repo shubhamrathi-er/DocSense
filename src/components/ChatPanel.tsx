@@ -128,7 +128,7 @@ export default function ChatPanel({
         </div>
 
         {/* Action buttons — hidden on small mobile */}
-        <div className="hidden sm:flex gap-2">
+        {/* <div className="hidden sm:flex gap-2">
           {["Export", "Share"].map((label) => (
             <button
               key={label}
@@ -140,7 +140,7 @@ export default function ChatPanel({
           <button className="text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all">
             + New Chat
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Stats bar — hidden on mobile */}
