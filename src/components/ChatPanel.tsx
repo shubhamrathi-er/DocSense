@@ -79,7 +79,7 @@ export default function ChatPanel({
             className="text-[18px] text-[#1a1916]"
             style={{ fontFamily: "'Instrument Serif', serif" }}
           >
-            Lexis
+            DocSense
           </div>
         </div>
 
