@@ -87,7 +87,7 @@ export default function Sidebar({ docs, activeDoc, onSelectDoc, onUpload }: Side
             className="text-[22px] text-[#1a1916] tracking-tight leading-none"
             style={{ fontFamily: "'Instrument Serif', serif" }}
           >
-            Lexis
+            DocSense
           </div>
           <div className="text-[11px] text-[#8a8680] mt-0.5">
             AI Document Intelligence

@@ -1,6 +1,6 @@
 import type { ClaudeMessage, SummarizeResponse } from "../types";
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "https://docsense-api-ouxc.onrender.com/";
+const BASE_URL = import.meta.env.VITE_API_URL ?? "https://docsense-api-ouxc.onrender.com";
 const AI_API_URL = `${BASE_URL}/api/ai`;
 
 export async function sendMessage(
