@@ -27,7 +27,7 @@ export async function summarizeDocument(
 ): Promise<SummarizeResponse> {
   const prompt = `You are an expert document analyst. Analyze the following document and respond ONLY with a valid JSON object in this exact format, no markdown, no extra text:
 {
-  "summary": "2-3 sentence overview of the document",
+  "summary": "4-5 sentence overview of the document",
   "keyPoints": ["point 1", "point 2", "point 3", "point 4"]
 }
 
